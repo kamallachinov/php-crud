@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
                 echo "Error updating record: " . $conn->error;
             }
         } else {
-            echo "<script>alert('The submitted name is the same as the existing one. No changes made.');
+            echo "<script>alert('No changes made.');
             window.history.back();
             
             

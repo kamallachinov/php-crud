@@ -1,17 +1,6 @@
 <?php
-// Database connection parameters
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "crud";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+// Database connection 
+include 'connect.php';
 
 // Fetch data from the database
 $sql = "SELECT * FROM `crud-test`";
@@ -21,22 +10,37 @@ if ($result->num_rows > 0) {
     // Output data of each row
     while ($row = $result->fetch_assoc()) {
         echo "<tr>";
-        echo "<th scope='row'>" . $row["id"] . "</th>";
-        echo "<td><form action='update_data.php' method='POST' action='update.php'><input type='text' class='form-control' name='name' value='" . $row["name"] . "' ></td>";
+        echo "<td>" . $row["id"] . "</td>";
         echo "<td>";
-
-        echo "<input type='hidden' name='id' value='" . $row["id"] . "' >";
-        echo "<input type='submit' class='btn btn-warning mr-2' value='Save' name='update'>";
-        echo "<a href='delete.php?id=" . $row["id"] . "' class='btn btn-danger'>Delete</a>";
-
+        echo "<input type='text' class='form-control' value='" . $row["name"] . "' />";
         echo "</td>";
-        echo "</form></tr>";
+        echo "<td>";
+        echo "<div class='btn-group'>";
+        echo "<form action='update_data.php' method='POST'>";
+        echo "<input type='hidden' name='id' value='" . $row["id"] . "'>";
+        echo "<input type='hidden' name='name' value='" . $row["name"] . "'>";
+        echo "<button type='submit' class='btn btn-primary' name='update'>Update</button>";
+        echo "</form>";
+        echo "<form action='delete.php' method='POST' onsubmit='return confirmDelete();'>";
+        echo "<input type='hidden' name='id' value='" . $row["id"] . "'>";
+        echo "<button type='submit' class='btn btn-danger ml-2' name='delete'>Delete</button>";
+        echo "</form>";
+        echo "</div>";
+        echo "</td>";
+        echo "</tr>";
     }
 } else {
     echo "<tr>
     <td colspan='3'>No records found</td>
-    </tr>";
+</tr>";
 }
-
 // Close connection
 $conn->close();
+?>
+
+<!-- Add a JavaScript function for confirmation -->
+<script>
+    function confirmDelete() {
+        return confirm('Are you sure you want to delete this record?');
+    }
+</script>

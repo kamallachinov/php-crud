@@ -1,14 +1,5 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "crud";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include 'connect.php'; //  database connection 
 
 if (isset($_POST['submit'])) {
     $name = $_POST['name'];
@@ -20,7 +11,7 @@ if (isset($_POST['submit'])) {
         if ($conn->query($sql) === TRUE) {
             echo "<script>
                     alert('success');
-                    window.location.href = 'http://localhost/phptest/test.php'; 
+                    window.location.href = 'http://localhost/phptest/main.php'; 
                   </script>";
             exit();
         } else {

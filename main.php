@@ -26,7 +26,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php include 'fetch_data.php'; ?>
+
                 </tbody>
 
             </table>
@@ -59,6 +59,47 @@
     </div>
 
     <?php include 'post_data.php' ?>
+
+
+    <script>
+    function fetchData() {
+        fetch('fetch_data.php')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Response error');
+                }
+                console.log(response);
+                return response.json();
+            })
+            .then(data => {
+                console.log(data)
+                let tableBody = document.querySelector('table tbody');
+                tableBody.innerHTML = ''; // Clear table body
+
+                // Loop through in the JSON data and create table rows
+                data.forEach(row => {
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${row.id}</td><td><input type='text' class='form-control' value='${row.name}' /></td>
+                                    <td><div class='btn-group'>
+                                        <form action='update_data.php' method='POST'>
+                                            <input type='hidden' name='id' value='${row.id}'>
+                                            <input type='hidden' name='name' value='${row.name}'>
+                                            <button type='submit' class='btn btn-primary' name='update'>Update</button>
+                                        </form>
+                                        <form action='delete.php' method='POST' onsubmit='return confirmDelete();'>
+                                            <input type='hidden' name='id' value='${row.id}'>
+                                            <button type='submit' class='btn btn-danger ml-2' name='delete'>Delete</button>
+                                        </form>
+                                    </div></td>`;
+                    tableBody.appendChild(tr);
+                });
+            })
+            .catch(error => console.error('There was a problem:', error));
+    }
+    fetchData();
+    </script>
+
+
 
     <!-- jQuery library (required) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

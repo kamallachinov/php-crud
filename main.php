@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
     <title>Document</title>
 </head>
 
@@ -46,9 +47,9 @@
                     <form action="post_data.php" method="POST">
                         <label for="exampleInputEmail1">Name</label>
                         <input type="text" class="form-control" placeholder="Enter name" name="name">
-                        <div class="d-flex justify-content-start align-items-center  mt-3 gap-2">
-                            <button type="submit" class="btn btn-primary" name="submit">Save changes</button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <div class="d-flex justify-content-start align-items-center flex-row">
+                            <button type="submit" class="btn btn-primary mr-2 my-2" name="submit">Save changes</button>
+                            <button type="button" class="btn btn-secondary my-2" data-dismiss="modal">Close</button>
                         </div>
                     </form>
                 </div>
@@ -60,49 +61,84 @@
 
     <?php include 'post_data.php' ?>
 
+    <!-- jQuery library (required) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <script>
     function fetchData() {
-        fetch('fetch_data.php')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Response error');
-                }
-                console.log(response);
-                return response.json();
-            })
-            .then(data => {
-                console.log(data)
+        $.ajax({
+            url: "fetch_data.php",
+            type: "GET",
+            success: function(data) {
                 let tableBody = document.querySelector('table tbody');
-                tableBody.innerHTML = ''; // Clear table body
+                tableBody.innerHTML = '';
 
-                // Loop through in the JSON data and create table rows
-                data.forEach(row => {
+                // Looping through the JSON data and creating table rows
+                JSON.parse(data).forEach(row => {
                     let tr = document.createElement('tr');
                     tr.innerHTML = `<td>${row.id}</td><td><input type='text' class='form-control' value='${row.name}' /></td>
-                                    <td><div class='btn-group'>
-                                        <form action='update_data.php' method='POST'>
-                                            <input type='hidden' name='id' value='${row.id}'>
-                                            <input type='hidden' name='name' value='${row.name}'>
-                                            <button type='submit' class='btn btn-primary' name='update'>Update</button>
-                                        </form>
-                                        <form action='delete.php' method='POST' onsubmit='return confirmDelete();'>
-                                            <input type='hidden' name='id' value='${row.id}'>
-                                            <button type='submit' class='btn btn-danger ml-2' name='delete'>Delete</button>
-                                        </form>
-                                    </div></td>`;
+                    <td><div class='btn-group'>
+                        <button class='btn btn-primary update-btn' data-id='${row.id}' data-name='${row.name}'>Update</button>
+                        <button class='btn btn-danger ml-2 delete-btn' data-id='${row.id}'>Delete</button>
+                    </div></td>`;
                     tableBody.appendChild(tr);
                 });
-            })
-            .catch(error => console.error('There was a problem:', error));
+            },
+            error: function(error) {
+                console.error('There was a problem:', error);
+            }
+        });
+
+        document.querySelector('table').addEventListener('click', function(event) {
+            if (event.target.classList.contains('delete-btn')) {
+                const id = event.target.getAttribute('data-id');
+                window.location.reload();
+                deleteData(id);
+            } else if (event.target.classList.contains('update-btn')) {
+                const id = event.target.getAttribute('data-id');
+                const name = event.target.getAttribute('data-name');
+                console.log(id, name)
+                updateData(id, name);
+            }
+        });
     }
+
     fetchData();
+
+    function deleteData(id) {
+        let action = "dltRecord";
+        $.ajax({
+            url: "delete.php",
+            type: "POST",
+            data: {
+                action: action,
+                id: id
+            },
+            success: function(data) {
+                alert(data);
+            }
+        });
+    }
+
+    function updateData(id, name) {
+        let action = "updateRecord";
+        $.ajax({
+            url: "update_data.php",
+            type: "POST",
+            data: {
+                action: action,
+                id: id,
+                name: name
+            },
+            success: function(data) {
+                alert(data);
+            }
+        });
+    }
     </script>
 
 
 
-    <!-- jQuery library (required) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <!-- Popper.js (required) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>

@@ -1,47 +1,39 @@
 <?php
-// Database connection parameters (assuming you're using the same connection details)
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "crud";
+include 'connect.php';
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-// Update logic
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit']) && $_POST['action'] == "updateRecord") {
     // Escape user inputs for security
-    $id = $conn->real_escape_string($_POST['id']);
-    $name = $conn->real_escape_string($_POST['name']);
+    $id = $_POST['id'];
+    $name = $_POST['name'];
 
-    // Fetch the row from the database
-    $sql_select = "SELECT name FROM `crud-test` WHERE `id`=$id";
-    $result = $conn->query($sql_select);
+    // Prepare and bind parameters
+    $stmt = $conn->prepare("SELECT name FROM `crud-test` WHERE `id`=?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    if ($result && $result->num_rows > 0) {
+    if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         $row_name = $row['name'];
-        
 
         // Compare the submitted input value with the value from the database
         if ($name !== $row_name) {
-            // Update the record
-            $sql_update = "UPDATE `crud-test` SET `name`='$name' WHERE `id`=$id";
-            if ($conn->query($sql_update) === TRUE) {
+            // Prepare and bind parameters
+            $stmt = $conn->prepare("UPDATE `crud-test` SET `name`=? WHERE `id`=?");
+            $stmt->bind_param("si", $name, $id);
+            if ($stmt->execute()) {
                 echo "<script>window.history.back();
                 alert('Record updated successfully')</script>";
+                exit(); // Optional: Stop execution after redirect
             } else {
-                echo "Error updating record: " . $conn->error;
+                echo "Error updating record: " . $stmt->error;
             }
         } else {
             echo "<script>alert('No changes made.');
             window.history.back();
             </script>";
+            exit(); // Optional: Stop execution after alert
         }
     } else {
         echo "No record found for the given ID";

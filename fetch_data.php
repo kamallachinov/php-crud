@@ -14,11 +14,12 @@ if ($result->num_rows > 0) {
     }
 } else {
     // No data found
-    $rows[] = array("id" => "", "name" => "", "actions" => "No records found");
+    $rows[] = array("id" => "<div>No item</div>", "name" => "No item", "actions" => "<div>No actions</div>");
 }
 
 // Closing connection
 $conn->close();
 
 // Convert data to JSON and echo it
+
 echo json_encode($rows);

@@ -73,36 +73,57 @@
                 let tableBody = document.querySelector('table tbody');
                 tableBody.innerHTML = '';
 
-                // Looping through the JSON data and creating table rows
-                JSON.parse(data).forEach(row => {
-                    let tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${row.id}</td><td><input type='text' class='form-control' value='${row.name}' /></td>
-                    <td><div class='btn-group'>
-                        <button class='btn btn-primary update-btn' data-id='${row.id}' data-name='${row.name}'>Update</button>
-                        <button class='btn btn-danger ml-2 delete-btn' data-id='${row.id}'>Delete</button>
-                    </div></td>`;
-                    tableBody.appendChild(tr);
-                });
+                if (data.length >= 0) {
+                    // Looping through the JSON data and creating table rows
+                    JSON.parse(data).forEach(row => {
+                        let tr = document.createElement('tr');
+                        let inputField = document.createElement('input');
+                        inputField.type = 'text';
+                        inputField.className = 'form-control';
+                        inputField.value = row.name;
+                        inputField.addEventListener('change', function() {
+                            // Update the data-name attribute of the corresponding "Update" button
+                            let updateBtn = tr.querySelector('.update-btn');
+                            updateBtn.setAttribute('data-name', inputField.value);
+                        });
+                        tr.innerHTML = `<td>${row.id}</td><td></td><td>
+                        <div class='btn-group'>
+                            <button class='btn btn-primary update-btn' data-id='${row.id}' data-name='${row.name}'>Update</button>
+                            <button class='btn btn-danger ml-2 delete-btn' data-id='${row.id}'>Delete</button>
+                        </div>
+                    </td>`;
+                        tr.querySelector('td:nth-child(2)').appendChild(inputField);
+                        tableBody.appendChild(tr);
+                    });
+                } else {
+                    let tr = document.createElement("tr");
+                    tr.innerHTML = `<td colspan='3'>${JSON.parse(data)[0].id}</td>`;
+                    tableBody.appendChild(data);
+                }
             },
             error: function(error) {
                 console.error('There was a problem:', error);
             }
         });
 
-        document.querySelector('table').addEventListener('click', function(event) {
-            if (event.target.classList.contains('delete-btn')) {
-                const id = event.target.getAttribute('data-id');
-                window.location.reload();
-                deleteData(id);
-            } else if (event.target.classList.contains('update-btn')) {
-                const id = event.target.getAttribute('data-id');
-                const name = event.target.getAttribute('data-name');
-                console.log(id, name)
-                updateData(id, name);
-            }
-        });
-    }
 
+
+    }
+    document.querySelector('table').addEventListener('click', function(event) {
+        if (event.target.classList.contains('delete-btn')) {
+            const id = event.target.getAttribute('data-id');
+            window.location.reload();
+            deleteData(id);
+        }
+    });
+    document.querySelector('table').addEventListener('click', function(event) {
+        if (event.target.classList.contains('update-btn')) {
+            const id = event.target.getAttribute('data-id');
+            const name = event.target.getAttribute('data-name');
+            // console.log(id, name)
+            updateData(id, name);
+        }
+    });
     fetchData();
 
     function deleteData(id) {
@@ -116,12 +137,16 @@
             },
             success: function(data) {
                 alert(data);
+            },
+            error: function(error) {
+                console.error('Error deleting record:', error);
             }
         });
     }
 
     function updateData(id, name) {
         let action = "updateRecord";
+        console.log("Updating record with ID: " + id + ", Name: " + name);
         $.ajax({
             url: "update_data.php",
             type: "POST",
@@ -131,7 +156,11 @@
                 name: name
             },
             success: function(data) {
+                console.log(data)
                 alert(data);
+            },
+            error: function(error) {
+                console.error('Error updating record:', error);
             }
         });
     }
